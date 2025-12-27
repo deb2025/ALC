@@ -7,8 +7,9 @@ import com.alcw.dto.UserDTO;
 import com.alcw.model.User;
 
 public interface AuthService {
-    User registerUser(UserDTO userDTO);
+    String registerUser(UserDTO userDTO); // Changed return type to String
     User verifyOTP(String email, String otp);
     User loginUser(LoginRequest loginRequest);
     User loginWithPatronId(PatronLoginRequest request);
+    String resendOTP(String email); // New method
 }

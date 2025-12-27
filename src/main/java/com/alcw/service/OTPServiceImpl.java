@@ -1,13 +1,16 @@
 package com.alcw.service;
 
 
+import com.alcw.dto.UserDTO;
 import com.alcw.exception.InvalidCredentialsException;
 import com.alcw.model.OTP;
 import com.alcw.repository.OTPRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +18,9 @@ public class OTPServiceImpl implements OTPService {
     private final OTPRepository otpRepository;
     private static final int OTP_LENGTH = 6;
     private static final int OTP_EXPIRY_MINUTES = 5;
+
+    // Temporary storage for user data during OTP verification
+    private final Map<String, UserDTO> userDataStorage = new ConcurrentHashMap<>();
 
     @Override
     public String generateOTP(String email) {
@@ -53,6 +59,21 @@ public class OTPServiceImpl implements OTPService {
     @Override
     public void clearOTP(String email) {
         otpRepository.deleteByEmail(email);
+    }
+
+    @Override
+    public void storeUserData(String email, UserDTO userDTO) {
+        userDataStorage.put(email, userDTO);
+    }
+
+    @Override
+    public UserDTO getUserData(String email) {
+        return userDataStorage.get(email);
+    }
+
+    @Override
+    public void clearUserData(String email) {
+        userDataStorage.remove(email);
     }
 
     private String generateRandomOTP() {

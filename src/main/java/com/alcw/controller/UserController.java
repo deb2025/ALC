@@ -8,7 +8,6 @@ import com.alcw.exception.InvalidCredentialsException;
 import com.alcw.model.User;
 import com.alcw.service.UserService;
 import com.cloudinary.Cloudinary;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

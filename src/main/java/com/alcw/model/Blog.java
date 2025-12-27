@@ -13,6 +13,7 @@ import java.util.List;
 public class Blog {
     @Id
     private String id;
+    private String blogId; // Auto-generated ALCBIDXXXX
     private String title;
     private String author;
     private LocalDateTime createdAt = LocalDateTime.now();

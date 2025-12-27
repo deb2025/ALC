@@ -2,6 +2,7 @@ package com.alcw.controller;
 
 
 import com.alcw.dto.*;
+import com.alcw.model.ResendOTPRequest;
 import com.alcw.model.User;
 import com.alcw.model.PasswordResetRequest;
 import com.alcw.service.PasswordResetService;
@@ -24,19 +25,13 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDTO) {
-        User user = authService.registerUser(userDTO);
-        return ResponseEntity.ok(new AuthResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getOccupation().toString(),
-                "Email has been sent for OTP verification"
-        ));
+        // Changed: Now returns a message instead of user data
+        String message = authService.registerUser(userDTO);
+        return ResponseEntity.ok(new MessageResponse(message));
     }
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOTP(@Valid @RequestBody OTPRequest otpRequest) {
-        // Now correctly passes the two separate parameters
         User user = authService.verifyOTP(otpRequest.getEmail(), otpRequest.getOtp());
         return ResponseEntity.ok(new AuthResponse(
                 user.getId(),
@@ -47,9 +42,14 @@ public class AuthController {
         ));
     }
 
+    @PostMapping("/resend-otp")
+    public ResponseEntity<?> resendOTP(@Valid @RequestBody ResendOTPRequest resendOTPRequest) {
+        String message = authService.resendOTP(resendOTPRequest.getEmail());
+        return ResponseEntity.ok(new MessageResponse(message));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
-        // Now correctly passes the LoginRequest object
         User user = authService.loginUser(loginRequest);
         String token = jwtUtil.generateToken(user);
         return ResponseEntity.ok(new AuthResponse(

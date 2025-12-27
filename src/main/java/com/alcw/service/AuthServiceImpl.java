@@ -14,19 +14,13 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
 
     @Override
-    public User registerUser(UserDTO userDTO) {
-        User user = new User();
-        user.setName(userDTO.getName());
-        user.setEmail(userDTO.getEmail());
-        user.setPassword(userDTO.getPassword());
-        user.setOccupation(userDTO.getOccupation());
-
-        return userService.registerUser(user);
+    public String registerUser(UserDTO userDTO) {
+        return userService.registerUser(userDTO); // Now returns message
     }
 
     @Override
     public User verifyOTP(String email, String otp) {
-        return userService.verifyOTP(email, otp); // Pass through to UserService
+        return userService.verifyOTP(email, otp);
     }
 
     @Override
@@ -37,5 +31,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public User loginWithPatronId(PatronLoginRequest request) {
         return userService.loginWithPatronId(request.getPatronId(), request.getPassword());
+    }
+
+    @Override
+    public String resendOTP(String email) {
+        return userService.resendOTP(email);
     }
 }

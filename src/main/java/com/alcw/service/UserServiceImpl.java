@@ -4,6 +4,7 @@ package com.alcw.service;
 
 
 import com.alcw.dto.UpdateProfileDTO;
+import com.alcw.dto.UserDTO;
 import com.alcw.exception.DuplicateEmailException;
 import com.alcw.exception.InvalidCredentialsException;
 import com.alcw.model.User;
@@ -27,45 +28,94 @@ public class UserServiceImpl implements UserService {
     private final Cloudinary cloudinary;
     private final SequenceGeneratorService sequenceGeneratorService;
 
-
     @Override
-    public User registerUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
+    public String registerUser(UserDTO userDTO) {
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new DuplicateEmailException("Email already registered");
         }
 
-        if (!isPasswordValid(user.getPassword())) {
+        if (!isPasswordValid(userDTO.getPassword())) {
             throw new InvalidCredentialsException(
                     "Password must contain 8+ characters, 1 uppercase, and 1 special character"
             );
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // Don't save user to database yet, just generate and send OTP
+        String otp = otpService.generateOTP(userDTO.getEmail());
+
+        // Store user data temporarily in OTP service for verification
+        otpService.storeUserData(userDTO.getEmail(), userDTO);
+
+        emailService.sendOTPEmail(userDTO.getEmail(), userDTO.getName(), otp);
+
+        return "OTP has been sent to your email for verification";
+    }
+
+    @Override
+    public boolean isPasswordValid(String password) {
+        String passwordRegex = "^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$";
+        return password.matches(passwordRegex);
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new InvalidCredentialsException("User not found"));
+    }
+
+    @Override
+    public User verifyOTP(String email, String otp) {
+        // First verify OTP
+        otpService.validateOTP(email, otp);
+
+        // If OTP is valid, then get user data and create the user
+        UserDTO userDTO = otpService.getUserData(email);
+
+        if (userDTO == null) {
+            throw new InvalidCredentialsException("User data not found. Please register again.");
+        }
+
+        // Create and save the user
+        User user = new User();
+        user.setName(userDTO.getName());
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setOccupation(userDTO.getOccupation());
+        user.setVerified(true);
+
+        // Generate membership ID
+        int nextNumber = sequenceGeneratorService.generateSequence("user_sequence");
+        String membershipId = String.format("ALCWB%04d", nextNumber);
+        user.setMembershipId(membershipId);
+
         User savedUser = userRepository.save(user);
 
-        String otp = otpService.generateOTP(user.getEmail());
-        emailService.sendOTPEmail(user.getEmail(), user.getName(), otp);
+        // Clear the temporary user data
+        otpService.clearUserData(email);
+
+        emailService.sendWelcomeEmail(savedUser);
 
         return savedUser;
     }
 
     @Override
-    public User verifyOTP(String email, String otp) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new InvalidCredentialsException("User not found"));
+    public String resendOTP(String email) {
+        // Check if user already exists
+        if (userRepository.existsByEmail(email)) {
+            throw new DuplicateEmailException("Email already registered and verified");
+        }
 
-        otpService.validateOTP(email, otp);
-        user.setVerified(true);
+        // Get stored user data
+        UserDTO userDTO = otpService.getUserData(email);
+        if (userDTO == null) {
+            throw new InvalidCredentialsException("No registration found for this email. Please register first.");
+        }
 
-        // Get next sequential number
-        int nextNumber = sequenceGeneratorService.generateSequence("user_sequence");
-        String membershipId = String.format("ALCWB%04d", nextNumber);
-        user.setMembershipId(membershipId);
+        // Generate and send new OTP
+        String otp = otpService.generateOTP(email);
+        emailService.sendOTPEmail(email, userDTO.getName(), otp);
 
-        User updatedUser = userRepository.save(user);
-        emailService.sendWelcomeEmail(updatedUser);
-
-        return updatedUser;
+        return "New OTP has been sent to your email";
     }
 
     @Override
@@ -78,7 +128,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!user.isVerified()) {
-            throw new InvalidCredentialsException("Account not verified");
+            throw new InvalidCredentialsException("Account not verified. Please verify your email first.");
         }
 
         return user;
@@ -100,25 +150,14 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-
-    @Override
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new InvalidCredentialsException("User not found"));
-    }
-
-    private boolean isPasswordValid(String password) {
-        return password.matches("^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$");
-    }
-
     @Override
     public User updateProfile(String email, UpdateProfileDTO updateDto, MultipartFile image) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new InvalidCredentialsException("User not found"));
 
-        // Validate password if present
+        // Validate password if present - use the existing isPasswordValid method
         if (updateDto.getPassword() != null && !updateDto.getPassword().isEmpty()) {
-            if (!updateDto.getPassword().matches("^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$")) {
+            if (!isPasswordValid(updateDto.getPassword())) {
                 throw new InvalidCredentialsException(
                         "Password must contain 8+ characters, 1 uppercase, and 1 special character");
             }
