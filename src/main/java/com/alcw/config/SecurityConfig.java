@@ -56,6 +56,7 @@ public class SecurityConfig {
                                 "/api/contact/**",
                                 "/actuator/**",
                                 "/error",
+                                "/healthz",
                                 "/api/blogs/**",
                                 "/api/admin/**",
                                 "/v3/api-docs/**",
