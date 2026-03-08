@@ -58,13 +58,15 @@ public class SecurityConfig {
                                 "/error",
                                 "/healthz",
                                 "/api/blogs/**",
-                                "/api/admin/**",
+                                "/api/admin/login",
+                                "/api/events/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/blogs").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/blogs/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/blogs/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/events/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
 
