@@ -1,0 +1,14 @@
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:12:58:29 +0530] "GET /api/admin/events/archived/search?event_id=ALCWBEID0005 HTTP/1.1" 404 177 5113231
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:12:58:55 +0530] "GET /api/events?status=archieved HTTP/1.1" 200 993 719607
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:00:49 +0530] "GET /api/events HTTP/1.1" 400 148 67183
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:00:56 +0530] "GET /api/events?status=archieve HTTP/1.1" 400 167 85888
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:02:37 +0530] "GET /api/events?status=archieved HTTP/1.1" 200 993 303191
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:02:47 +0530] "GET /api/admin/events/archived/search?event_id=ALCWBEID0005&status=archived HTTP/1.1" 403 132 179222
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:02:53 +0530] "POST /api/admin/login HTTP/1.1" 200 283 1062015
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:03:07 +0530] "GET /api/admin/events/archived/search?event_id=ALCWBEID0005&status=archived HTTP/1.1" 404 177 327886
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:07:56 +0530] "GET /api/admin/events/search?event_id=ALCWBEID0005&status=archived HTTP/1.1" 200 983 1111894
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:08:03 +0530] "GET /api/admin/events/search?event_id=ALCWBEID0005 HTTP/1.1" 200 983 183047
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:08:07 +0530] "GET /api/admin/events/search HTTP/1.1" 200 983 326144
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:09:25 +0530] "GET /api/admin/events/search?event_id=ALCWBEID0006&status=archived HTTP/1.1" 400 177 772930
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:11:26 +0530] "DELETE /api/admin/events?event_id=ALCWBEID0005 HTTP/1.1" 200 77 2103507
+0:0:0:0:0:0:0:1 - - [11/Mar/2026:13:11:46 +0530] "DELETE /api/admin/events?event_id=ALCWBEID0007 HTTP/1.1" 400 172 318856
