@@ -63,7 +63,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(RestClientException.class)
     public ResponseEntity<LawResponse> handleAiServiceErrors(RestClientException ex) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
-                new LawResponse("Legal service is currently unavailable: " + ex.getMessage())
+                new LawResponse("Legal service is currently unavailable. Please try again later.")
         );
     }
 
@@ -102,7 +102,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<LawResponse> handleGeneralExceptions(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                new LawResponse("An unexpected error occurred: " + ex.getMessage())
+                new LawResponse("An unexpected error occurred. Please try again later.")
         );
     }
 

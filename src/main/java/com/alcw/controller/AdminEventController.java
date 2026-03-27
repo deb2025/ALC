@@ -1,10 +1,11 @@
 package com.alcw.controller;
 
-import com.alcw.dto.ApiResponse;
-import com.alcw.dto.ArchivedEventRequest;
-import com.alcw.dto.UpcomingEventRequest;
+import com.alcw.dto.*;
 import com.alcw.model.Event;
+import com.alcw.model.EventRegistration;
+import com.alcw.service.EventRegistrationService;
 import com.alcw.service.EventService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class AdminEventController {
 
     private final EventService eventService;
+    private final EventRegistrationService eventRegistrationService;
 
     @PostMapping("/upcoming")
     public ResponseEntity<ApiResponse<Event>> createUpcomingEvent(@ModelAttribute UpcomingEventRequest request) {
@@ -59,7 +61,7 @@ public class AdminEventController {
         ));
     }
 
-    @GetMapping("/search")
+    @GetMapping({"/search", "/archived/search"})
     public ResponseEntity<ApiResponse<List<Event>>> searchEvents(
             @RequestParam(value = "event_id", required = false) String eventId,
             @RequestParam(value = "status", required = false) String status
@@ -69,6 +71,34 @@ public class AdminEventController {
                 .map(this::mapStatusLabel)
                 .toList();
         return ResponseEntity.ok(new ApiResponse<>("All events loaded", events));
+    }
+
+    @GetMapping("/participants")
+    public ResponseEntity<ApiResponse<List<EventRegistration>>> getParticipantsByEventId(@RequestParam("event_id") String eventId) {
+        return ResponseEntity.ok(new ApiResponse<>(
+                "Participants loaded successfully.",
+                eventRegistrationService.getParticipants(eventId)
+        ));
+    }
+
+    @PutMapping("/registration-window")
+    public ResponseEntity<ApiResponse<RegistrationWindowResponse>> updateRegistrationWindow(
+            @RequestParam("event_id") String eventId,
+            @Valid @RequestBody RegistrationWindowRequest request
+    ) {
+        return ResponseEntity.ok(new ApiResponse<>(
+                "Registration window updated successfully.",
+                eventRegistrationService.updateRegistrationWindow(eventId, request)
+        ));
+    }
+
+    @PostMapping("/participants/notify")
+    public ResponseEntity<ApiResponse<Map<String, String>>> notifyParticipants(
+            @RequestParam("event_id") String eventId,
+            @Valid @RequestBody EventParticipantsBroadcastRequest request
+    ) {
+        eventRegistrationService.sendBroadcastToParticipants(eventId, request);
+        return ResponseEntity.ok(new ApiResponse<>("Broadcast email queued successfully.", Map.of("event_id", eventId)));
     }
 
     private ArchivedEventRequest mapArchivedRequest(MultipartHttpServletRequest request) {

@@ -34,6 +34,9 @@ public class Event {
     private String eventOverview;
     private String eventSpeakerOverview;
 
+    private LocalDateTime registrationOpenFrom;
+    private LocalDateTime registrationOpenUntil;
+
     // Archieved fields
     private String archievedEventName;
     private String archievedEventSpeakerName;
