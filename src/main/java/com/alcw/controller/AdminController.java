@@ -1,6 +1,7 @@
 package com.alcw.controller;
 
 import com.alcw.dto.AdminLoginRequest;
+import com.alcw.dto.AdminLoginResponse;
 import com.alcw.service.AdminAuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,8 +19,7 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AdminLoginRequest request) {
-        String token = adminAuthService.login(request);
-        return ResponseEntity.ok().body(java.util.Map.of("token", token));
+    public ResponseEntity<AdminLoginResponse> login(@RequestBody AdminLoginRequest request) {
+        return ResponseEntity.ok(adminAuthService.login(request));
     }
 }

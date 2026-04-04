@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Reminder</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #222; line-height: 1.5;">
+<p>Dear <strong th:text="${name}">Participant</strong>,</p>
+
+<p>This is a reminder that <strong th:text="${eventName}">Event</strong> is coming up in 2 days.</p>
+<p>
+    Event Date: <strong th:text="${eventDate}">20 Feb 2026</strong><br/>
+    Start Time: <strong th:text="${eventStartTime}">07:30 PM</strong>
+</p>
+
+<div th:if="${eventImage != null}">
+    <img th:src="${eventImage}" alt="Event Image" style="max-width: 500px; width: 100%; border-radius: 6px;"/>
+</div>
+
+<p>We look forward to your presence.</p>
+<p>Team Art Law Communion</p>
+</body>
+</html>
