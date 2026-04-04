@@ -23,7 +23,7 @@ public class ContactServiceImpl implements ContactService {
     private final ContactRepository contactRepository;
 
     // admin recipient (not the Brevo sender). Configure in application.properties.
-    @Value("${app.admin.email}")
+    @Value("${app.admin.email:artlawcommunion@gmail.com}")
     private String adminEmail;
 
     @Override
