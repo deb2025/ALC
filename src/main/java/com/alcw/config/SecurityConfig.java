@@ -1,7 +1,5 @@
 package com.alcw.config;
 
-
-
 import com.alcw.util.ApiRateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,23 +35,25 @@ public class SecurityConfig {
 
     @Value("${app.security.cors.allowed-origins}")
     private String allowedOrigins;
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ApiRateLimitFilter apiRateLimitFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF completely
+                // 1. Disable CSRF completely since we use JWT
                 .csrf(csrf -> csrf.disable())
 
-                // Configure CORS
+                // 2. Attach our custom CORS configuration source
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // Set session management to stateless
+                // 3. Set session management to stateless
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                // Configure authorization
+
+                // 4. Secure basic HTTP headers
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.deny())
                         .contentTypeOptions(contentType -> {})
@@ -65,8 +65,13 @@ public class SecurityConfig {
                         )
                         .permissionsPolicy(permissions -> permissions.policy("geolocation=(), microphone=(), camera=()"))
                 )
-                // Configure authorization
+
+                // 5. Configure path authorization rules
                 .authorizeHttpRequests(auth -> auth
+                        // CRITICAL: Explicitly permit all HTTP OPTIONS preflight requests globally
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Public endpoints
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/law/**",
@@ -78,15 +83,19 @@ public class SecurityConfig {
                                 "/api/events/**"
                         ).permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+
+                        // RBAC Endpoints
                         .requestMatchers(HttpMethod.POST, "/api/blogs").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/blogs/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/blogs/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/events/**").hasRole("ADMIN")
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
+
+                        // Fallback catch-all authentication
                         .anyRequest().authenticated()
                 )
 
-                // Add JWT filter
+                // 6. Add custom security filters
                 .addFilterBefore(apiRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -96,22 +105,32 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+
+        // Sanitize allowed origins config
         List<String> origins = Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(origin -> !origin.isEmpty())
                 .collect(Collectors.toList());
 
         configuration.setAllowedOrigins(origins);
+
+        // Ensure standard UI methods and preflight OPTIONS are registered
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin"));
+
+        // Explicitly accept common browser headers + custom ones you use
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+
+        // Expose JWT auth token to the frontend client bundle
         configuration.setExposedHeaders(List.of("Authorization"));
+
+        // Keep credentials false based on your layout requirements
         configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
