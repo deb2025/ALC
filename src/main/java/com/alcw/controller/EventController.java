@@ -23,12 +23,15 @@ public class EventController {
 
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Event>>> getEventsByStatus(@RequestParam("status") String status) {
-        List<Event> events = eventService.getEventsByStatus(status)
-                .stream()
-                .map(this::mapStatusLabel)
-                .toList();
-        return ResponseEntity.ok(new ApiResponse<>("Events loaded successfully.", events));
+    public ResponseEntity<ApiResponse<List<Event>>> getEventsByStatus(@RequestParam(value = "status", required = false) String status) {
+        List<Event> events;
+        if (status != null && !status.isBlank() && !"all".equalsIgnoreCase(status)) {
+            events = eventService.getEventsByStatus(status);
+        } else {
+            events = eventService.searchEvents(null, null);
+        }
+        List<Event> mappedEvents = events.stream().map(this::mapStatusLabel).toList();
+        return ResponseEntity.ok(new ApiResponse<>("Events loaded successfully.", mappedEvents));
     }
 
     @GetMapping("/{eventId}")
