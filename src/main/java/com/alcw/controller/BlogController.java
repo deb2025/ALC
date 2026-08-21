@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-
 import java.util.List;
 import java.util.Map;
 
@@ -19,21 +17,18 @@ import java.util.Map;
 public class BlogController {
     private final BlogService blogService;
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ADMIN')")
     @PostMapping
     public ResponseEntity<Blog> createBlog(@ModelAttribute BlogDTO blogDTO) {
         Blog blog = blogService.createBlog(blogDTO);
         return ResponseEntity.ok(blog);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ADMIN')")
     @PostMapping("/json")
     public ResponseEntity<Blog> createBlogJson(@RequestBody BlogDTO blogDTO) {
         Blog blog = blogService.createBlog(blogDTO);
         return ResponseEntity.ok(blog);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Blog> updateBlog(
             @PathVariable String id,
@@ -42,7 +37,6 @@ public class BlogController {
         return ResponseEntity.ok(blog);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ADMIN')")
     @PutMapping("/{id}/json")
     public ResponseEntity<Blog> updateBlogJson(
             @PathVariable String id,
@@ -51,7 +45,6 @@ public class BlogController {
         return ResponseEntity.ok(blog);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteBlog(@PathVariable String id) {
         blogService.deleteBlog(id);

@@ -68,10 +68,6 @@ public class SecurityConfig {
                 // Configure authorization
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/blogs", "/api/blogs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/blogs", "/api/blogs/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/blogs", "/api/blogs/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/blogs", "/api/blogs/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/law/**",
@@ -82,7 +78,9 @@ public class SecurityConfig {
                                 "/api/events",
                                 "/api/events/**",
                                 "/api/admin/events",
-                                "/api/admin/events/**"
+                                "/api/admin/events/**",
+                                "/api/blogs",
+                                "/api/blogs/**"
                         ).permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/actuator/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
