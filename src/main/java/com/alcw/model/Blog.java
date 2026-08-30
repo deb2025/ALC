@@ -11,6 +11,7 @@ import java.util.List;
 @Data
 @Document(collection = "blogs")
 public class Blog {
+    public static final String SEQUENCE_NAME = "blog_sequence";
     @Id
     private String id;
     private String blogId; // Auto-generated ALCBIDXXXX
